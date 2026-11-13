@@ -1,9 +1,9 @@
-/* STL Geometry Region Painter — offline shell v1.20-pwa1.
+/* STL Geometry Region Painter — offline shell v1.20-pwa2.
  * Change CACHE_VERSION whenever any required app file changes.
  * An update installs atomically; an unsuccessful install leaves the previous
  * active worker/cache intact. New workers wait for old tabs to close.
  */
-const CACHE_VERSION = 'stl-region-painter-v1.20-pwa1';
+const CACHE_VERSION = 'stl-region-painter-v1.20-pwa2';
 const REQUIRED_FILES = [
   './',
   './index.html',
@@ -52,7 +52,9 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
   // Only serve known app-shell resources; never cache user STL/3MF data.
-  const allowed = REQUIRED_FILES.some(path => new URL(path, self.registration.scope).href === url.href);
+  // Match known shell paths without query strings (e.g. ?utm_source=...).
+  // The cache lookup below also ignores the search string.
+  const allowed = REQUIRED_FILES.some(path => new URL(path, self.registration.scope).pathname === url.pathname);
   if (!allowed) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_VERSION);
